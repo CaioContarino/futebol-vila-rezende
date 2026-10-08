@@ -6,6 +6,8 @@ Um site responsivo para até **16 jogadores**, com inscrição por nome, contado
 
 **Endereço:** Avenida Paulista, 1425 — Nova Piracicaba, Piracicaba/SP. **Dia:** toda segunda-feira. **Início:** 21:00. Há um mapa incorporado que pode ser movido/aproximado e um botão que abre o link do Google Maps fornecido pelo organizador.
 
+**Data dinâmica da partida:** a seção **Local e Data** mostra a data exata da segunda-feira associada à lista atual (por exemplo, `12/10/2026`). A data é calculada pelo próprio navegador usando a mesma âncora semanal das inscrições. Na terça-feira às 00:00 (Piracicaba), muda para a segunda-feira seguinte, sem alterar o Firebase. Se o site estiver aberto durante a virada, a data atualiza na própria página.
+
 **Renovação semanal:** toda terça às **00:00**, horário de Piracicaba. A aplicação escolhe automaticamente uma nova lista semanal e troca de lista sem necessidade de alguém apertar botões; o servidor Firebase valida que as gravações só ocorram na semana atual.
 
 ## Como funciona a desistência?
@@ -104,3 +106,19 @@ O Realtime Database **não oferece** `numChildren()` em suas regras de seguranç
 ## Conferência do arquivo firebase-config.js
 
 Este pacote já contém o UID do organizador tanto em `firebase-config.js` quanto nas regras. Os valores de `FUT_CONFIG` e o e-mail de `FUT_ADMIN` já estão preenchidos neste pacote; nunca inclua a senha no JS. Confira também em Authentication os provedores Anônimo e E-mail/senha, e o domínio do GitHub Pages nos domínios autorizados em Authentication → Settings → Authorized domains caso seja necessário.
+
+
+## Publicar atualização pelo GitHub + Netlify
+
+1. Substitua no repositório GitHub os arquivos **`index.html`**, **`app.js`**, **`styles.css`** (todos na raiz, junto com `firebase-config.js`).
+2. Faça commit na branch conectada ao Netlify (`main`). Se o projeto Netlify estiver vinculado ao GitHub, o novo deploy acontece automaticamente após o commit. Se ainda não estiver vinculado, importe o repositório no Netlify e escolha publish directory `.` e build command vazio.
+3. Esta atualização **não modifica a estrutura dos dados ou as regras Firebase**: não é necessário reaplicar `database.rules.json` se as regras corrigidas com UID já estiverem publicadas.
+4. Verifique no site a data da segunda-feira, que mudará sozinha após terça às 00:00.
+
+## Ajustes visuais e indicador de conexão
+
+- O cabeçalho principal agora mostra **VAGAS ABERTAS** e a frase **Coloque seu nome na lista e garanta já a sua vaga!**.
+- O marcador **PASSO 01** foi removido, mas a inscrição continua funcionando normalmente.
+- O antigo slogan do rodapé foi substituído pelo estado **Site online** ou **Site offline**, acompanhado de um ponto verde ou vermelho.
+- **O indicador não testa se o Netlify está no ar para todas as pessoas.** Ele mostra se **este navegador** conseguiu autenticar no Firebase, se conectar ao Realtime Database e ler a lista. Enquanto a conexão é estabelecida, mostra **Verificando conexão...**. Sem Firebase configurado, mostra **Modo demonstração**.
+- Para publicar via Netlify com GitHub, substitua **`index.html`**, **`styles.css`** e **`app.js`** na raiz do repositório e faça commit. Não é necessário atualizar as regras do Firebase para estes ajustes visuais.

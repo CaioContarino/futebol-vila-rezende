@@ -41,6 +41,16 @@
   let firebaseReattachWeek = null;
   const getDemoKey = () => DEMO_KEY_PREFIX + weekStart;
   const getNextWeekStart = () => weekStart + WEEK_MS;
+  // A segunda-feira às 21h em Piracicaba ocorre três horas antes da
+  // terça às 00h em que a lista será renovada. Segue a mesma âncora
+  // usada nas regras do Firebase (UTC-03; veja observação no README).
+  const getMatchTimestamp = () => getNextWeekStart() - 3 * 60 * 60 * 1000;
+  const matchDateFormatter = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric'
+  });
+  const matchLongFormatter = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
   const adminDialog = $('admin-dialog');
   const adminPassword = $('admin-password');
   const adminSettings = window.FUT_ADMIN || {};
@@ -70,8 +80,30 @@
   function updateStatus(message, statusType) {
     status.className = `live-status ${statusType || ''}`;
     connectionText.textContent = message;
+
+    // O rodapé acompanha a conexão REAL com o Firebase. Não é um
+    // monitoramento global de disponibilidade da hospedagem Netlify.
+    const footer = $('site-health');
+    const footerText = $('site-health-text');
+    if (!footer || !footerText) return;
+    if (mode === 'demo') {
+      footer.dataset.state = 'demo';
+      footerText.textContent = 'Modo demonstração';
+    } else if (statusType === 'connected') {
+      footer.dataset.state = 'online';
+      footerText.textContent = 'Site online';
+    } else if (statusType === 'offline') {
+      footer.dataset.state = 'offline';
+      footerText.textContent = 'Site offline';
+    } else {
+      footer.dataset.state = 'checking';
+      footerText.textContent = 'Verificando conexão...';
+    }
   }
   function render() {
+    const matchDate = new Date(getMatchTimestamp());
+    $('match-next-date-short').textContent = matchDateFormatter.format(matchDate);
+    $('match-next-date-long').textContent = matchLongFormatter.format(matchDate);
     const weekday = new Intl.DateTimeFormat('pt-BR', {timeZone: 'America/Sao_Paulo', day:'2-digit', month:'2-digit'}).format(new Date(weekStart));
     $('week-range-label').textContent = `reiniciada terça-feira (${weekday}), às 00:00`;
     const list = getSortedPlayers();
@@ -200,6 +232,7 @@
 
   async function initializeFirebase() {
     mode = 'firebase';
+    updateStatus('Conectando', '');
     const config = window.FUT_CONFIG;
     try {
       const base = 'https://www.gstatic.com/firebasejs/12.4.0/';
@@ -214,19 +247,22 @@
       // Cada terça-feira abre uma nova lista; nomes da semana anterior não reaparecem.
       // O Firebase aplica a semana vigente nas regras; a interface controla 16 vagas, não é um limite rígido no servidor.
       let stopWeekListener = null;
+      let rosterAvailable = false;
       const attachWeekListener = () => {
         if (stopWeekListener) stopWeekListener();
+        rosterAvailable = false;
         const targetWeek = weekStart;
         const playersRef = firebaseDatabase.ref(db, `weeks/${targetWeek}/players`);
         stopWeekListener = firebaseDatabase.onValue(playersRef, snapshot => {
           if (weekStart !== targetWeek) return;
           const value = snapshot.val();
           players = value && typeof value === 'object' ? value : {};
-          render();
+          rosterAvailable = true;
+          syncConnectivity();
         }, err => {
           if (weekStart !== targetWeek) return;
           console.error('Falha ao ler a lista da semana:', err);
-          dbAvailable = false;
+          rosterAvailable = false;
           syncConnectivity();
           flash('Sem permissão para ler a lista desta semana. Atualize as regras do Firebase.', true);
         });
@@ -235,8 +271,9 @@
       let authAvailable = false;
       let dbAvailable = false;
       const syncConnectivity = () => {
-        connected = authAvailable && dbAvailable;
-        updateStatus(connected ? 'Ao vivo' : 'Sem conexão', connected ? 'connected' : 'offline');
+        connected = authAvailable && dbAvailable && rosterAvailable;
+        const state = connected ? 'connected' : dbAvailable && !authAvailable ? '' : 'offline';
+        updateStatus(connected ? 'Ao vivo' : state === 'offline' ? 'Sem conexão' : 'Conectando', state);
         render();
       };
 

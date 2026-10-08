@@ -36,9 +36,9 @@
       <section class="hero" aria-labelledby="hero-heading">
         <div class="hero-pitch" aria-hidden="true"><div class="pitch-center"></div><div class="pitch-line pitch-line-top"></div><div class="pitch-line pitch-line-bottom"></div></div>
         <div class="hero-content">
-          <div class="eyebrow"><span class="tiny-ball">✳</span> CONVOCAÇÃO ABERTA</div>
+          <div class="eyebrow"><span class="tiny-ball">✳</span> VAGAS ABERTAS</div>
           <h1 id="hero-heading">Futebol<br /><span>Vila Rezende</span></h1>
-          <p>Coloca seu nome na lista e garante a sua vaga. Sem bagunça no grupo, sem dúvida de quem vai jogar.</p>
+          <p>Coloque seu nome na lista e garanta já a sua vaga!</p>
           <div class="hero-footer">
             <span class="chip"><span class="chip-circle"></span> Vagas limitadas</span>
             <span class="hero-sublabel">Inscrição vinculada ao navegador</span>
@@ -56,9 +56,10 @@
         <div class="match-details-info">
           <div class="match-details-top"><span class="section-kicker">INFORMAÇÕES DO JOGO</span><span class="match-live-dot" aria-hidden="true"></span></div>
           <div class="match-details-heading"><span class="match-details-emoji" aria-hidden="true">📍</span><div><h2>Local e Data</h2><p class="match-details-subtitle">Toda segunda-feira, às 21h.</p></div></div>
+          <p class="match-next-date-note">Jogo desta lista: <strong id="match-next-date-long" aria-live="polite">Calculando data...</strong></p>
           <address class="match-address"><strong>Avenida Paulista, 1425</strong><span>Nova Piracicaba · Piracicaba, SP</span></address>
           <div class="match-meta">
-            <div class="match-meta-block match-meta-day"><span class="match-meta-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span><div><span class="match-meta-label">DIA DO JOGO</span><strong>Toda segunda</strong></div></div>
+            <div class="match-meta-block match-meta-day"><span class="match-meta-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span><div><span class="match-meta-label">DATA DA PARTIDA</span><strong id="match-next-date-short">--/--/----</strong></div></div>
             <div class="match-meta-block"><span class="match-meta-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span><div><span class="match-meta-label">INÍCIO DO JOGO</span><strong>21:00</strong></div></div>
           </div>
           <a class="maps-link" href="https://maps.google.com/maps/place//data=!4m2!3m1!1s0x94c631e706321579:0x9cba3dde9eff35a?entry=s&amp;sa=X&amp;ved=2ahUKEwjtppnlxKqXAxXDDrkGHZTMIoEQ4kB6BAgEEAA&amp;hl=en" target="_blank" rel="noopener noreferrer" aria-label="Abrir a localização no Google Maps em nova aba"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5h6v6m0-6-9 9"/><path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg> Abrir no Google Maps</a>
@@ -73,7 +74,7 @@
 
       <div class="columns">
         <section class="signup-panel panel" aria-labelledby="signup-heading">
-          <div class="panel-heading"><span class="panel-icon panel-icon-lime" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg></span><div><span class="section-kicker">PASSO 01</span><h2 id="signup-heading">Garanta sua vaga</h2></div></div>
+          <div class="panel-heading"><span class="panel-icon panel-icon-lime" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg></span><div><h2 id="signup-heading">Garanta sua vaga</h2></div></div>
           <div id="signup-box">
             <p class="panel-description">É rapidinho. Digite seu nome e entre na lista de confirmados.</p>
             <form id="signup-form" novalidate>
@@ -103,7 +104,13 @@
       </div>
       <section class="info-strip"><span class="info-icon">i</span><div><strong>Como funciona?</strong><p>Entre com seu nome, confira os confirmados e compartilhe o link com a galera. Se desistir, toque em “Desistir da lista” no mesmo navegador em que se inscreveu. <strong>Toda terça-feira à 00:00</strong> (horário de Piracicaba), a lista da semana começa vazia automaticamente.</p></div></section>
     </main>
-    <footer class="footer"><span>FUTEBOL <span class="brand-accent">VILA REZENDE</span></span><span>Menos mensagem, mais futebol.</span></footer>
+    <footer class="footer">
+      <span class="footer-brand">FUTEBOL <span class="brand-accent">VILA REZENDE</span></span>
+      <div class="site-health" id="site-health" data-state="checking" role="status" aria-live="polite" aria-label="Status da conexão com o Firebase" title="Este indicador reflete a conexão deste navegador com o Firebase, não a disponibilidade global da hospedagem.">
+        <span class="site-health-dot" aria-hidden="true"></span>
+        <span id="site-health-text">Verificando conexão...</span>
+      </div>
+    </footer>
   </div>
 
   <dialog id="cancel-dialog" aria-labelledby="dialog-heading">
