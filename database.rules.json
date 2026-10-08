@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "weeks": {
+      "$weekStart": {
+        "players": {
+          ".read": "$weekStart === (now - ((now - 1791255600000) % 604800000)) + ''",
+          "$uid": {
+            ".write": "auth != null && $weekStart === (now - ((now - 1791255600000) % 604800000)) + '' && ((auth.uid === $uid && ((!data.exists() && newData.exists()) || (data.exists() && !newData.exists()))) || (auth.uid === 'Iiu5voyZsiMS4NpFN4mk5GDgfDr1' && data.exists() && !newData.exists()))",
+            ".validate": "newData.hasChildren(['name', 'joinedAt'])",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 40 && newData.val().matches(/.*[^ ]+.*/)"
+            },
+            "joinedAt": {
+              ".validate": "newData.isNumber() && newData.val() >= now - 120000 && newData.val() <= now + 120000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
+    }
+  }
+}
