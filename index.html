@@ -79,8 +79,9 @@
             <p class="panel-description">É rapidinho. Digite seu nome e entre na lista de confirmados.</p>
             <form id="signup-form" novalidate>
               <label for="player-name">Seu nome</label>
-              <input type="text" id="player-name" name="name" placeholder="Ex.: João Silva" minlength="2" maxlength="40" autocomplete="name" required />
-              <span class="input-help">Use um nome que a galera reconheça.</span>
+              <input type="text" id="player-name" name="name" placeholder="Ex.: João ⚽" minlength="3" maxlength="25" autocomplete="name" aria-describedby="name-help name-warning" required />
+              <span class="input-help" id="name-help">De 3 a 25 caracteres. Pode usar emojis! ⚽</span>
+              <span id="name-warning" class="name-feedback" role="status" aria-live="polite" hidden></span>
               <button class="primary-btn" id="signup-btn" type="submit"><span>Confirmar presença</span><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></button>
             </form>
           </div>

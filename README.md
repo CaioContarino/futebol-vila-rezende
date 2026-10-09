@@ -112,7 +112,7 @@ Este pacote já contém o UID do organizador tanto em `firebase-config.js` quant
 
 1. Substitua no repositório GitHub os arquivos **`index.html`**, **`app.js`**, **`styles.css`** (todos na raiz, junto com `firebase-config.js`).
 2. Faça commit na branch conectada ao Netlify (`main`). Se o projeto Netlify estiver vinculado ao GitHub, o novo deploy acontece automaticamente após o commit. Se ainda não estiver vinculado, importe o repositório no Netlify e escolha publish directory `.` e build command vazio.
-3. Esta atualização **não modifica a estrutura dos dados ou as regras Firebase**: não é necessário reaplicar `database.rules.json` se as regras corrigidas com UID já estiverem publicadas.
+3. **Para a versão com filtros de nomes, publique as regras atualizadas `database.rules.json` no Firebase antes do deploy.** A estrutura de `/weeks/.../players` e o UID administrativo permanecem iguais.
 4. Verifique no site a data da segunda-feira, que mudará sozinha após terça às 00:00.
 
 ## Ajustes visuais e indicador de conexão
@@ -121,4 +121,23 @@ Este pacote já contém o UID do organizador tanto em `firebase-config.js` quant
 - O marcador **PASSO 01** foi removido, mas a inscrição continua funcionando normalmente.
 - O antigo slogan do rodapé foi substituído pelo estado **Site online** ou **Site offline**, acompanhado de um ponto verde ou vermelho.
 - **O indicador não testa se o Netlify está no ar para todas as pessoas.** Ele mostra se **este navegador** conseguiu autenticar no Firebase, se conectar ao Realtime Database e ler a lista. Enquanto a conexão é estabelecida, mostra **Verificando conexão...**. Sem Firebase configurado, mostra **Modo demonstração**.
-- Para publicar via Netlify com GitHub, substitua **`index.html`**, **`styles.css`** e **`app.js`** na raiz do repositório e faça commit. Não é necessário atualizar as regras do Firebase para estes ajustes visuais.
+- Para publicar via Netlify com GitHub, substitua **`index.html`**, **`styles.css`** e **`app.js`** na raiz do repositório e faça commit. A versão atual COM filtros de nomes também exige a publicação de `database.rules.json` no Console do Firebase.
+
+
+## Filtros de nomes — atualização
+
+A inscrição agora aplica as seguintes verificações:
+
+- **Formatação automática:** espaços extras removidos, iniciais padronizadas; conectores como “de”, “da” e “dos” mantidos em minúsculas quando internos.
+- **Emojis permitidos:** “Caio ⚽”, “João 🔥” e “Pedro 😎” são válidos. É necessário incluir pelo menos uma letra (emoji isolado não identifica alguém).
+- **De 3 a 25 caracteres:** vale para o texto salvo e também para as regras do Firebase. Algumas sequências de emoji ocupam mais de uma unidade de caracteres, então podem atingir o limite mais cedo.
+- **Nomes inválidos e palavras inadequadas:** bloqueia links, vários símbolos de código e uma lista objetiva de termos ofensivos. O filtro não é perfeito e deve ser ajustado com cuidado para não rejeitar nomes legítimos.
+- **Possíveis duplicatas:** compara os nomes ignorando acentos, maiúsculas/minúsculas, emojis e pontuação. Exibe um **aviso**, pede confirmação e permite que pessoas com nomes iguais se inscrevam. Essa verificação só ocorre no navegador; as regras Firebase não bloqueiam homônimos.
+
+### Instalação obrigatória no Firebase
+
+**Primeiro publique `database.rules.json` em Firebase → Realtime Database → Regras, depois atualize `index.html`, `styles.css` e `app.js` no GitHub/Netlify.** O arquivo JSON no GitHub é só uma cópia: não atualiza as regras de segurança automaticamente.
+
+O Firebase verifica conteúdo, limites, presença de letras, espaços, links e palavras inadequadas mesmo que alguém ignore o JavaScript. A capitalização automática é feita no site (as regras de segurança não conseguem realizar o mesmo tratamento Unicode completo no servidor). As regras usam expressões regulares no formato compatível com Realtime Database.
+
+Registros já existentes, anteriores à atualização, permanecem até a próxima renovação semanal.

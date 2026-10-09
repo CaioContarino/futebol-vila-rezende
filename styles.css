@@ -93,3 +93,9 @@
 .footer .site-health[data-state="offline"] .site-health-dot{background:#ff9a8b;box-shadow:0 0 0 4px #ff9a8b20}
 .footer .site-health[data-state="demo"]{color:#b7baa2}
 @media(max-width:500px){.footer{align-items:center;gap:10px}.footer > .footer-brand{font-size:14px}.footer .site-health{font-size:11px}}
+
+/* Feedback do filtro de nomes (incluindo possíveis homônimos). */
+.name-feedback{display:block;margin-top:10px;border-radius:9px;padding:10px 12px;font-size:12px;line-height:1.55;background:#253324;color:#d9efc0;border:1px solid #516547}
+.name-feedback[data-type="warning"]{background:#332b17;color:#ffe3a2;border-color:#7a6434}
+.name-feedback[data-type="error"]{background:#422b29;color:#ffc5bf;border-color:#82514c}
+.name-feedback[data-type="ok"]{background:#1c3425;color:#caf4d0;border-color:#456a4a}

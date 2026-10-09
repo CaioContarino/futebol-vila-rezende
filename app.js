@@ -60,8 +60,59 @@
     !String(adminSettings.uid).startsWith('COLE_')
   );
 
+  // A validação local também está espelhada nas regras do Realtime Database.
+  // Emojis são permitidos com um nome; não são removidos nem trocados.
+  const NAME_MIN = 3;
+  const NAME_MAX = 25;
+  const LATIN_LETTER = /[A-Za-zÀ-ÖØ-öø-ÿ]/;
+  const BAD_SYMBOLS = /[<>@\/#$%&*=+~|^\\]/;
+  const LINK_LIKE = /https?:|www[.]|[.](com|br|net|org)/i;
+  // Lista pequena e explícita, com limites de palavra para não barrar nomes por pedaços.
+  const OFFENSIVE_WORD = /[^A-Za-zÀ-ÖØ-öø-ÿ](porra|caralho|merda|fdp|vsf|pqp|buceta|arrombado|puta|puto|cuzão|cuzao|vtnc)[^A-Za-zÀ-ÖØ-öø-ÿ]/i;
+  const NAME_CONNECTORS = new Set(['da', 'de', 'do', 'das', 'dos', 'e']);
   function cleanName(raw) {
-    return String(raw || '').replace(/\s+/g, ' ').trim();
+    return String(raw ?? '').normalize('NFC').replace(/\s+/g, ' ').trim();
+  }
+  function formatName(raw) {
+    return cleanName(raw).replace(/[A-Za-zÀ-ÖØ-öø-ÿ]+/g, (part, offset, text) => {
+      const lower = part.toLocaleLowerCase('pt-BR');
+      const isConnector = NAME_CONNECTORS.has(lower) && offset > 0 && text[offset - 1] === ' ';
+      return isConnector ? lower : lower.charAt(0).toLocaleUpperCase('pt-BR') + lower.slice(1);
+    });
+  }
+  function validateName(name) {
+    if (name.length < NAME_MIN || name.length > NAME_MAX) return 'Use um nome de 3 a 25 caracteres (emojis são permitidos).';
+    if (!LATIN_LETTER.test(name)) return 'Digite pelo menos uma letra no nome. Você pode incluir emojis.';
+    if (/\s/.test(name.replace(/ /g, '')) || / {2,}/.test(name)) return 'Use apenas espaços simples entre as palavras.';
+    if (BAD_SYMBOLS.test(name) || LINK_LIKE.test(name)) return 'Use um nome ou apelido, sem links ou símbolos especiais.';
+    if (OFFENSIVE_WORD.test(' ' + name + ' ')) return 'Esse nome contém uma palavra inadequada. Escolha outro.';
+    return '';
+  }
+  function comparisonKey(name) {
+    // Para o aviso: acentos, caixa, emojis e pontuação não criam falsos nomes distintos.
+    return cleanName(name).normalize('NFD').replace(/\p{M}/gu, '')
+      .toLocaleLowerCase('pt-BR').replace(/[^\p{L}\p{N}]+/gu, ' ').trim().replace(/ +/g, ' ');
+  }
+  function duplicateMatches(name) {
+    const key = comparisonKey(name);
+    if (!key) return [];
+    return Object.entries(players).filter(([uid, player]) => uid !== currentUid &&
+      player && typeof player.name === 'string' && comparisonKey(player.name) === key)
+      .map(([, player]) => player.name);
+  }
+  function updateNameFeedback() {
+    const el = $('name-warning');
+    if (!el) return;
+    const raw = input.value;
+    if (!raw.trim()) { el.textContent = ''; el.hidden = true; el.dataset.type = ''; return; }
+    const name = formatName(raw);
+    const error = validateName(name);
+    const matches = error ? [] : duplicateMatches(name);
+    el.hidden = false;
+    el.dataset.type = error ? 'error' : matches.length ? 'warning' : 'ok';
+    el.textContent = error || (matches.length
+      ? `Atenção: \"${matches[0]}\" já aparece na lista. Se for outra pessoa com o mesmo nome, você ainda pode se inscrever.`
+      : `Nome que será exibido: ${name}`);
   }
   function getSortedPlayers() {
     return Object.entries(players)
@@ -166,6 +217,7 @@
       $('signup-heading').textContent = 'Vaga garantida';
     }
     renderAdmin();
+    updateNameFeedback();
   }
 
   function safeStorageGet(key) {
@@ -359,11 +411,19 @@
     return 'Ocorreu um erro. Confira sua conexão e tente novamente.';
   }
 
+  input.addEventListener('input', updateNameFeedback);
+  input.addEventListener('blur', () => {
+    if (input.value) input.value = formatName(input.value);
+    updateNameFeedback();
+  });
   form.addEventListener('submit', async event => {
     event.preventDefault();
-    const name = cleanName(input.value);
-    if (name.length < 2 || name.length > 40) {
-      flash('Digite um nome entre 2 e 40 caracteres.', true);
+    const name = formatName(input.value);
+    input.value = name;
+    const nameError = validateName(name);
+    if (nameError) {
+      flash(nameError, true);
+      updateNameFeedback();
       input.focus();
       return;
     }
@@ -371,6 +431,8 @@
     if (!connected || !adapter || busy) return;
     if (getSortedPlayers().length >= MAX) { flash('Lista completa! Espere uma vaga liberar.', true); return; }
     if (players[currentUid]) { flash('Você já está inscrito.', true); return; }
+    const matches = duplicateMatches(name);
+    if (matches.length && !window.confirm(`O nome \"${matches[0]}\" já consta na lista. Você é outra pessoa com o mesmo nome e quer continuar?`)) return;
     busy = true;
     render();
     try {
